@@ -5,7 +5,6 @@ const Schema = mongoose.Schema;
 
 // Schema definition
 const usersSchema = new Schema({
-    "_id": mongoose.ObjectId,
     "id": Number,
     "user_type": String,
     "name": String,
@@ -57,6 +56,35 @@ router.get('/:id', async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 });
+
+// Define a route for creating a user
+router.post('/', async (req, res) => {
+    try {
+      // Extract necessary information from the request body
+      const { email, password, first_name, last_name } = req.body;
+  
+      // Validate if required fields are present
+      if (!email || !password || !first_name || !last_name) {
+        return res.status(400).json({ message: 'Missing required fields' });
+      }
+  
+      // Create a new user document
+      const newUser = await usersModel.create({
+        email,
+        password,
+        first_name,
+        last_name,
+        // You can set other fields here if needed
+      });
+  
+      // Return the newly created user
+      res.status(201).json({ user: newUser });
+    } catch (error) {
+      console.error('Error creating user:', error);
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  });
+
 
 router.delete('/:id', async (req, res) => {
     try {

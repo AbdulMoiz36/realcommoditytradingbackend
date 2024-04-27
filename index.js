@@ -1,7 +1,6 @@
 // Import packages
 const express = require("express");
 const home = require("./routes/home");
-const home = require("./routes/home");
 const admins_Router = require("./routes/admins");
 const blogs_Router = require("./routes/blogs");
 const categories_Router = require("./routes/categories");
@@ -30,13 +29,11 @@ const offer_Router = require("./routes/verified_offers");
 
 const mongoose = require('mongoose');
 const cors = require('cors');
-const res = require("express/lib/response");
 
 const axios = require('axios');
 const cheerio = require('cheerio');
 const { v4: uuidv4 } = require('uuid');
 
-const res = require("express/lib/response");
 
 // Middlewares
 const app = express();
@@ -72,7 +69,7 @@ app.use("/countries", countries_Router);
 app.use("/credit_history", credit_history_Router);
 app.use("/verified_offers", offer_Router);
 app.use("/users", users_Router);
-app.use("/users", document_inquiry_Router);
+app.use("/document_inquiry", document_inquiry_Router);
 app.use("/failed_jobs", failed_job_Router);
 app.use("/inquiries", inquiries_Router);
 app.use("/member_registrtations", member_registrtations_Router);
