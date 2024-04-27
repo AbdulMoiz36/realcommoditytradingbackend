@@ -1,69 +1,71 @@
-import mongoose from "mongoose";
+const express = require("express");
+const mongoose = require("mongoose");
+const router = express.Router();
 const Schema = mongoose.Schema;
-const model = mongoose.model;
 
-export const countries_Mongoose = new Schema({
+// Schema definition
+const countriesSchema = new Schema({
     "_id": mongoose.ObjectId,
     "id": Number,
-    "phone_code": Number,
-    "country_code": String,
-    "country_name": String,
-}, { collection: "countries" })
-export const countries_MongooseModel = model("countries_MongooseModel", 
-countries_Mongoose);
+    "name": String,
+    "code": String,
+    "created_at": String,
+    "updated_at": String,
+}, { 
+    collection: "countries" }
+);
 
+// Model definition
+const countriesModel = mongoose.model("countriesModel", countriesSchema);
+
+// Routes
 router.get('/', async (req, res) => {
     try {
-      // Use Mongoose to find all documents in the "verified_offers" collection
-      const countries = await countries_MongooseModel.find();
-      // Return the fetched data as a response
-      res.json(countries);
+        const countries = await countriesModel.find();
+        res.json(countries);
     } catch (error) {
-      // If an error occurs, return an error response
-      res.status(500).json({ message: error.message });
+        res.status(500).json({ message: error.message });
     }
-  });
+});
 
-  // Route to find one country by ID
 router.get('/:id', async (req, res) => {
-  try {
-    const country = await countries_MongooseModel.findById(req.params.id);
-    if (!country) {
-      return res.status(404).json({ message: 'Country not found' });
+    try {
+        const country = await countriesModel.findOne({ _id: req.params.id });
+        if (!country) {
+            return res.status(404).json({ message: 'Country not found' });
+        }
+        res.json(country);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
     }
-    res.json(country);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
 });
 
-// Route to delete one country by ID
 router.delete('/:id', async (req, res) => {
-  try {
-    const deletedCountry = await countries_MongooseModel.findByIdAndDelete(req.params.id);
-    if (!deletedCountry) {
-      return res.status(404).json({ message: 'Country not found' });
+    try {
+        const deletedCountry = await countriesModel.findOneAndDelete({ _id: req.params.id });
+        if (!deletedCountry) {
+            return res.status(404).json({ message: 'Country not found' });
+        }
+        res.json({ message: 'Country deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
     }
-    res.json({ message: 'Country deleted successfully' });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
 });
 
-// Route to update one country by ID
 router.patch('/:id', async (req, res) => {
-  try {
-    const updatedCountry = await countries_MongooseModel.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true }
-    );
-    if (!updatedCountry) {
-      return res.status(404).json({ message: 'Country not found' });
+    try {
+        const updatedCountry = await countriesModel.findOneAndUpdate(
+            { _id: req.params.id },
+            req.body,
+            { new: true }
+        );
+        if (!updatedCountry) {
+            return res.status(404).json({ message: 'Country not found' });
+        }
+        res.json(updatedCountry);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
     }
-    res.json(updatedCountry);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
 });
+
 module.exports = router;

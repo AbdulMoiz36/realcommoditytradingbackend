@@ -1,7 +1,10 @@
-import mongoose from "mongoose";
+const express = require("express");
+const mongoose = require("mongoose");
+
+const router = express.Router();
 const Schema = mongoose.Schema;
-const model = mongoose.model;
-export const member_registrations_Mongoose = new Schema({
+
+const memberRegistrationSchema = new Schema({
     "_id": mongoose.ObjectId,
     "id": Number,
     "user_id": Number,
@@ -75,62 +78,57 @@ export const member_registrations_Mongoose = new Schema({
     "updated_at": Date,
     "other_others_o": String,
     "agree_t_c": String,
-}, { collection: "member_registrations" })
-export const member_registrations_MongooseModel = model("member_registrations_MongooseModel", member_registrations_Mongoose);
+}, { collection: "member_registrations" });
+
+const memberRegistrationsModel = mongoose.model("member_registrationsModel", memberRegistrationSchema);
 
 router.get('/', async (req, res) => {
     try {
-    
-      const members = await member_registrations_MongooseModel.find();
-      // Return the fetched data as a response
-      res.json(members);
+        const members = await memberRegistrationsModel.find();
+        res.json(members);
     } catch (error) {
-      // If an error occurs, return an error response
-      res.status(500).json({ message: error.message });
+        res.status(500).json({ message: error.message });
     }
-  });
+});
 
-  // Route to find one member registration by ID
 router.get('/:id', async (req, res) => {
     try {
-      const member = await member_registrations_MongooseModel.findOne({ _id: req.params.id });
-      if (!member) {
-        return res.status(404).json({ message: 'Member registration not found' });
-      }
-      res.json(member);
+        const member = await memberRegistrationsModel.findById(req.params.id);
+        if (!member) {
+            return res.status(404).json({ message: 'Member registration not found' });
+        }
+        res.json(member);
     } catch (error) {
-      res.status(500).json({ message: error.message });
+        res.status(500).json({ message: error.message });
     }
-  });
-  
-  // Route to delete one member registration by ID
-  router.delete('/:id', async (req, res) => {
+});
+
+router.delete('/:id', async (req, res) => {
     try {
-      const deletedMember = await member_registrations_MongooseModel.findOneAndDelete({ _id: req.params.id });
-      if (!deletedMember) {
-        return res.status(404).json({ message: 'Member registration not found' });
-      }
-      res.json({ message: 'Member registration deleted successfully' });
+        const deletedMember = await memberRegistrationsModel.findByIdAndDelete(req.params.id);
+        if (!deletedMember) {
+            return res.status(404).json({ message: 'Member registration not found' });
+        }
+        res.json({ message: 'Member registration deleted successfully' });
     } catch (error) {
-      res.status(500).json({ message: error.message });
+        res.status(500).json({ message: error.message });
     }
-  });
-  
-  // Route to update one member registration by ID
-  router.patch('/:id', async (req, res) => {
+});
+
+router.patch('/:id', async (req, res) => {
     try {
-      const updatedMember = await member_registrations_MongooseModel.findOneAndUpdate(
-        { _id: req.params.id },
-        req.body,
-        { new: true }
-      );
-      if (!updatedMember) {
-        return res.status(404).json({ message: 'Member registration not found' });
-      }
-      res.json(updatedMember);
+        const updatedMember = await memberRegistrationsModel.findByIdAndUpdate(
+            req.params.id,
+            req.body,
+            { new: true }
+        );
+        if (!updatedMember) {
+            return res.status(404).json({ message: 'Member registration not found' });
+        }
+        res.json(updatedMember);
     } catch (error) {
-      res.status(500).json({ message: error.message });
+        res.status(500).json({ message: error.message });
     }
-  });
-  
-  export default router;
+});
+
+module.exports = router;

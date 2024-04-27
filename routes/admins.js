@@ -1,8 +1,10 @@
-import mongoose from "mongoose";
+const express = require("express");
+const mongoose = require("mongoose");
+const router = express.Router();
 const Schema = mongoose.Schema;
-const model = mongoose.model;
 
-export const admins_Mongoose = new Schema({
+// Schema definition
+const adminsSchema = new Schema({
     "_id": mongoose.ObjectId,
     "id": Number,
     "name": String,
@@ -10,64 +12,61 @@ export const admins_Mongoose = new Schema({
     "password": String,
     "created_at": String,
     "updated_at": String,
-}, { collection: "admins" })
-export const admins_MongooseModel = model("admins_MongooseModel", admins_Mongoose);
+}, { 
+    collection: "admins" }
+);
 
+// Model definition
+const adminsModel = mongoose.model("adminsModel", adminsSchema);
+
+// Routes
 router.get('/', async (req, res) => {
     try {
-      // Use Mongoose to find all documents in the "verified_offers" collection
-      const admins = await admins_MongooseModel.find();
-      // Return the fetched data as a response
-      res.json(admins);
+        const admins = await adminsModel.find();
+        res.json(admins);
     } catch (error) {
-      // If an error occurs, return an error response
-      res.status(500).json({ message: error.message });
+        res.status(500).json({ message: error.message });
     }
-  });
+});
 
-
-// Route to find one admin by ID
 router.get('/:id', async (req, res) => {
-  try {
-    const admin = await admins_MongooseModel.findById(req.params.id);
-    if (!admin) {
-      return res.status(404).json({ message: 'Admin not found' });
+    try {
+        const admin = await adminsModel.findOne({ _id: req.params.id });
+        if (!admin) {
+            return res.status(404).json({ message: 'Admin not found' });
+        }
+        res.json(admin);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
     }
-    res.json(admin);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
 });
 
-
-// Route to delete an admin by ID
 router.delete('/:id', async (req, res) => {
-  try {
-    const deletedAdmin = await admins_MongooseModel.findByIdAndDelete(req.params.id);
-    if (!deletedAdmin) {
-      return res.status(404).json({ message: 'Admin not found' });
+    try {
+        const deletedAdmin = await adminsModel.findOneAndDelete({ _id: req.params.id });
+        if (!deletedAdmin) {
+            return res.status(404).json({ message: 'Admin not found' });
+        }
+        res.json({ message: 'Admin deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
     }
-    res.json({ message: 'Admin deleted successfully' });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
 });
 
-// Route to update an admin by ID
 router.patch('/:id', async (req, res) => {
-  try {
-    const updatedAdmin = await admins_MongooseModel.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true }
-    );
-    if (!updatedAdmin) {
-      return res.status(404).json({ message: 'Admin not found' });
+    try {
+        const updatedAdmin = await adminsModel.findOneAndUpdate(
+            { _id: req.params.id },
+            req.body,
+            { new: true }
+        );
+        if (!updatedAdmin) {
+            return res.status(404).json({ message: 'Admin not found' });
+        }
+        res.json(updatedAdmin);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
     }
-    res.json(updatedAdmin);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
 });
 
 module.exports = router;

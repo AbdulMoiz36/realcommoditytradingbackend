@@ -1,7 +1,10 @@
-import mongoose from "mongoose";
+const express = require("express");
+const mongoose = require("mongoose");
+
+const router = express.Router();
 const Schema = mongoose.Schema;
-const model = mongoose.model;
-export const partner_lounge_comments_Mongoose = new Schema({
+
+const partnerLoungeCommentsSchema = new Schema({
     "_id": mongoose.ObjectId,
     "id": Number,
     "lounge_id": Number,
@@ -11,62 +14,57 @@ export const partner_lounge_comments_Mongoose = new Schema({
     "is_reply": Number,
     "created_at": Date,
     "updated_at": Date,
-}, { collection: "partner_lounge_comments" })
-export const partner_lounge_comments_MongooseModel = model("partner_lounge_comments_MongooseModel", partner_lounge_comments_Mongoose);
+}, { collection: "partner_lounge_comments" });
+
+const partnerLoungeCommentsModel = mongoose.model("partnerLoungeCommentsModel", partnerLoungeCommentsSchema);
 
 router.get('/', async (req, res) => {
     try {
-      // Use Mongoose to find all documents in the "verified_offers" collection
-      const lounge = await partner_lounge_comments_MongooseModel.find();
-      // Return the fetched data as a response
-      res.json(lounge);
+        const lounge = await partnerLoungeCommentsModel.find();
+        res.json(lounge);
     } catch (error) {
-      // If an error occurs, return an error response
-      res.status(500).json({ message: error.message });
+        res.status(500).json({ message: error.message });
     }
-  });
+});
 
-  // Route to find one partner lounge comment by ID
 router.get('/:id', async (req, res) => {
     try {
-      const comment = await partner_lounge_comments_MongooseModel.findOne({ _id: req.params.id });
-      if (!comment) {
-        return res.status(404).json({ message: 'Partner lounge comment not found' });
-      }
-      res.json(comment);
+        const comment = await partnerLoungeCommentsModel.findOne({ _id: req.params.id });
+        if (!comment) {
+            return res.status(404).json({ message: 'Partner lounge comment not found' });
+        }
+        res.json(comment);
     } catch (error) {
-      res.status(500).json({ message: error.message });
+        res.status(500).json({ message: error.message });
     }
-  });
-  
-  // Route to delete one partner lounge comment by ID
-  router.delete('/:id', async (req, res) => {
+});
+
+router.delete('/:id', async (req, res) => {
     try {
-      const deletedComment = await partner_lounge_comments_MongooseModel.findOneAndDelete({ _id: req.params.id });
-      if (!deletedComment) {
-        return res.status(404).json({ message: 'Partner lounge comment not found' });
-      }
-      res.json({ message: 'Partner lounge comment deleted successfully' });
+        const deletedComment = await partnerLoungeCommentsModel.findOneAndDelete({ _id: req.params.id });
+        if (!deletedComment) {
+            return res.status(404).json({ message: 'Partner lounge comment not found' });
+        }
+        res.json({ message: 'Partner lounge comment deleted successfully' });
     } catch (error) {
-      res.status(500).json({ message: error.message });
+        res.status(500).json({ message: error.message });
     }
-  });
-  
-  // Route to update one partner lounge comment by ID
-  router.patch('/:id', async (req, res) => {
+});
+
+router.patch('/:id', async (req, res) => {
     try {
-      const updatedComment = await partner_lounge_comments_MongooseModel.findOneAndUpdate(
-        { _id: req.params.id },
-        req.body,
-        { new: true }
-      );
-      if (!updatedComment) {
-        return res.status(404).json({ message: 'Partner lounge comment not found' });
-      }
-      res.json(updatedComment);
+        const updatedComment = await partnerLoungeCommentsModel.findOneAndUpdate(
+            { _id: req.params.id },
+            req.body,
+            { new: true }
+        );
+        if (!updatedComment) {
+            return res.status(404).json({ message: 'Partner lounge comment not found' });
+        }
+        res.json(updatedComment);
     } catch (error) {
-      res.status(500).json({ message: error.message });
+        res.status(500).json({ message: error.message });
     }
-  });
-  
-  export default router;
+});
+
+module.exports = router;

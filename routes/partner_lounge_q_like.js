@@ -1,7 +1,9 @@
-import mongoose from "mongoose";
+const express = require("express");
+const mongoose = require("mongoose");
+const router = express.Router();
 const Schema = mongoose.Schema;
-const model = mongoose.model;
-export const partner_lounge_q_like_tbl_Mongoose = new Schema({
+
+const partnerLoungeQLikeSchema = new Schema({
     "_id": mongoose.ObjectId,
     "id": Number,
     "user_id": String,
@@ -9,62 +11,57 @@ export const partner_lounge_q_like_tbl_Mongoose = new Schema({
     "like_status": Number,
     "created_at": Date,
     "updated_at": Date,
-}, { collection: "partner_lounge_q_like_tbl" })
-export const partner_lounge_q_like_tbl_MongooseModel = model("partner_lounge_q_like_tbl_MongooseModel", partner_lounge_q_like_tbl_Mongoose);
+}, { collection: "partner_lounge_q_like_tbl" });
+
+const partnerLoungeQLikeModel = mongoose.model("partnerLoungeQLikeModel", partnerLoungeQLikeSchema);
 
 router.get('/', async (req, res) => {
     try {
-
-      const lounge = await partner_lounge_q_like_tbl_MongooseModel.find();
-      // Return the fetched data as a response
-      res.json(lounge);
+        const entries = await partnerLoungeQLikeModel.find();
+        res.json(entries);
     } catch (error) {
-      // If an error occurs, return an error response
-      res.status(500).json({ message: error.message });
+        res.status(500).json({ message: error.message });
     }
-  });
+});
 
-  // Route to find one entry by ID
 router.get('/:id', async (req, res) => {
     try {
-      const entry = await partner_lounge_q_like_tbl_MongooseModel.findOne({ _id: req.params.id });
-      if (!entry) {
-        return res.status(404).json({ message: 'Entry not found' });
-      }
-      res.json(entry);
+        const entry = await partnerLoungeQLikeModel.findOne({ _id: req.params.id });
+        if (!entry) {
+            return res.status(404).json({ message: 'Entry not found' });
+        }
+        res.json(entry);
     } catch (error) {
-      res.status(500).json({ message: error.message });
+        res.status(500).json({ message: error.message });
     }
-  });
-  
-  // Route to delete one entry by ID
-  router.delete('/:id', async (req, res) => {
+});
+
+router.delete('/:id', async (req, res) => {
     try {
-      const deletedEntry = await partner_lounge_q_like_tbl_MongooseModel.findOneAndDelete({ _id: req.params.id });
-      if (!deletedEntry) {
-        return res.status(404).json({ message: 'Entry not found' });
-      }
-      res.json({ message: 'Entry deleted successfully' });
+        const deletedEntry = await partnerLoungeQLikeModel.findOneAndDelete({ _id: req.params.id });
+        if (!deletedEntry) {
+            return res.status(404).json({ message: 'Entry not found' });
+        }
+        res.json({ message: 'Entry deleted successfully' });
     } catch (error) {
-      res.status(500).json({ message: error.message });
+        res.status(500).json({ message: error.message });
     }
-  });
-  
-  // Route to update one entry by ID
-  router.patch('/:id', async (req, res) => {
+});
+
+router.patch('/:id', async (req, res) => {
     try {
-      const updatedEntry = await partner_lounge_q_like_tbl_MongooseModel.findOneAndUpdate(
-        { _id: req.params.id },
-        req.body,
-        { new: true }
-      );
-      if (!updatedEntry) {
-        return res.status(404).json({ message: 'Entry not found' });
-      }
-      res.json(updatedEntry);
+        const updatedEntry = await partnerLoungeQLikeModel.findOneAndUpdate(
+            { _id: req.params.id },
+            req.body,
+            { new: true }
+        );
+        if (!updatedEntry) {
+            return res.status(404).json({ message: 'Entry not found' });
+        }
+        res.json(updatedEntry);
     } catch (error) {
-      res.status(500).json({ message: error.message });
+        res.status(500).json({ message: error.message });
     }
-  });
-  
-  export default router;
+});
+
+module.exports = router;

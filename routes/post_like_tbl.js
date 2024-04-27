@@ -1,7 +1,10 @@
-import mongoose from "mongoose";
+const express = require("express");
+const mongoose = require("mongoose");
+
+const router = express.Router();
 const Schema = mongoose.Schema;
-const model = mongoose.model;
-export const post_like_tbl_Mongoose = new Schema({
+
+const postLikeTblSchema = new Schema({
     "_id": mongoose.ObjectId,
     "id": Number,
     "user_id": String,
@@ -9,62 +12,57 @@ export const post_like_tbl_Mongoose = new Schema({
     "like_status": Number,
     "created_at": Date,
     "updated_at": Date,
-}, { collection: "post_like_tbl" })
-export const post_like_tbl_MongooseModel = model("post_like_tbl_MongooseModel", post_like_tbl_Mongoose);
+}, { collection: "post_like_tbl" });
+
+const postLikeTblModel = mongoose.model("postLikeTblModel", postLikeTblSchema);
 
 router.get('/', async (req, res) => {
     try {
-      // Use Mongoose to find all documents in the "verified_offers" collection
-      const tbl = await post_like_tbl_MongooseModel.find();
-      // Return the fetched data as a response
-      res.json(tbl);
+        const tbl = await postLikeTblModel.find();
+        res.json(tbl);
     } catch (error) {
-      // If an error occurs, return an error response
-      res.status(500).json({ message: error.message });
+        res.status(500).json({ message: error.message });
     }
-  });
+});
 
-  // Route to find one entry by ID
 router.get('/:id', async (req, res) => {
     try {
-      const entry = await post_like_tbl_MongooseModel.findOne({ _id: req.params.id });
-      if (!entry) {
-        return res.status(404).json({ message: 'Entry not found' });
-      }
-      res.json(entry);
+        const entry = await postLikeTblModel.findOne({ _id: req.params.id });
+        if (!entry) {
+            return res.status(404).json({ message: 'Entry not found' });
+        }
+        res.json(entry);
     } catch (error) {
-      res.status(500).json({ message: error.message });
+        res.status(500).json({ message: error.message });
     }
-  });
-  
-  // Route to delete one entry by ID
-  router.delete('/:id', async (req, res) => {
+});
+
+router.delete('/:id', async (req, res) => {
     try {
-      const deletedEntry = await post_like_tbl_MongooseModel.findOneAndDelete({ _id: req.params.id });
-      if (!deletedEntry) {
-        return res.status(404).json({ message: 'Entry not found' });
-      }
-      res.json({ message: 'Entry deleted successfully' });
+        const deletedEntry = await postLikeTblModel.findOneAndDelete({ _id: req.params.id });
+        if (!deletedEntry) {
+            return res.status(404).json({ message: 'Entry not found' });
+        }
+        res.json({ message: 'Entry deleted successfully' });
     } catch (error) {
-      res.status(500).json({ message: error.message });
+        res.status(500).json({ message: error.message });
     }
-  });
-  
-  // Route to update one entry by ID
-  router.patch('/:id', async (req, res) => {
+});
+
+router.patch('/:id', async (req, res) => {
     try {
-      const updatedEntry = await post_like_tbl_MongooseModel.findOneAndUpdate(
-        { _id: req.params.id },
-        req.body,
-        { new: true }
-      );
-      if (!updatedEntry) {
-        return res.status(404).json({ message: 'Entry not found' });
-      }
-      res.json(updatedEntry);
+        const updatedEntry = await postLikeTblModel.findOneAndUpdate(
+            { _id: req.params.id },
+            req.body,
+            { new: true }
+        );
+        if (!updatedEntry) {
+            return res.status(404).json({ message: 'Entry not found' });
+        }
+        res.json(updatedEntry);
     } catch (error) {
-      res.status(500).json({ message: error.message });
+        res.status(500).json({ message: error.message });
     }
-  });
-  
-  export default router;
+});
+
+module.exports = router;
