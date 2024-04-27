@@ -4,16 +4,19 @@ const home = require("./routes/home");
 const VerifiedOffer = require("./routes/verified_offers");
 const mongoose = require('mongoose');
 const cors = require('cors');
+
 const axios = require('axios');
 const cheerio = require('cheerio');
 const { v4: uuidv4 } = require('uuid');
+
+const res = require("express/lib/response");
 
 // Middlewares
 const app = express();
 
 // Set up CORS
 const corsOptions = {
-  origin: 'http://localhost:3000',
+  origin: ['http://localhost:3000', 'https://realcommoditytrading.vercel.app'],
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
   preflightContinue: false,
   optionsSuccessStatus: 204,
@@ -31,6 +34,7 @@ mongoose.connect('mongodb+srv://moiz36:4RGR6pM_Yh-cx7z@cluster0.ocumynd.mongodb.
 .catch((error) => {
   console.error('Error connecting to MongoDB:', error);
 });
+
 
 // Routes
 app.use("/home", home);

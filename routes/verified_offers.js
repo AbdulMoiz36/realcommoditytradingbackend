@@ -29,6 +29,9 @@ const VerifiedOffer = mongoose.model('VerifiedOffer', verified_offers_Mongoose);
 router.get('/', async (req, res) => {
     try {
       const offers = await VerifiedOffer.find();
+
+      // Return the fetched data as a response
+
       res.json(offers);
     } catch (error) {
       res.status(500).json({ message: error.message });
