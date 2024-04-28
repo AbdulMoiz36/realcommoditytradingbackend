@@ -1,7 +1,9 @@
-import mongoose from "mongoose";
-const Schema = mongoose.Schema;
-const model = mongoose.model;
-export const post_Mongoose = new Schema({
+const express = require("express");
+const router = express.Router();
+const mongoose = require('mongoose');
+const { Schema } = mongoose;
+
+const post_Mongoose = new Schema({
     "_id": mongoose.ObjectId,
     "id": Number,
     "offer_type": Number,
@@ -55,7 +57,7 @@ export const post_Mongoose = new Schema({
     "created_at": Date,
     "updated_at": Date,
 }, { collection: "post" })
-export const post_MongooseModel = model("post_MongooseModel", post_Mongoose);
+ const post_MongooseModel = mongoose.model("post_MongooseModel", post_Mongoose);
 
 router.get('/', async (req, res) => {
     try {
@@ -112,4 +114,4 @@ router.get('/:id', async (req, res) => {
     }
   });
   
-  export default router;
+  module.exports = router;
