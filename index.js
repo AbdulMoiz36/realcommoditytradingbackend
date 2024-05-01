@@ -61,7 +61,6 @@ mongoose.connect('mongodb+srv://moiz36:4RGR6pM_Yh-cx7z@cluster0.ocumynd.mongodb.
 
 
 // Routes
-app.use("/document_inquiry", home);
 app.use("/admins", admins_Router);
 app.use("/blogs", blogs_Router);
 app.use("/categories", categories_Router);
@@ -105,37 +104,42 @@ class RealtimeScraper {
   }
 
   async scrape() {
-      const data = [];
-      try {
-          const response = await this.session.get('https://markets.businessinsider.com/commodities');
-          const html = response.data;
-          const $ = cheerio.load(html);
+    const data = [];
+    try {
+        const response = await this.session.get('https://markets.businessinsider.com/commodities');
+        const html = response.data;
+        const $ = cheerio.load(html);
 
-          $('tr.table__tr').each((index, element) => {
-              const name = $(element).find('td.table__td.bold').text().trim();
-              const price = $(element).find('div[data-field="Mid"]').text().trim();
-              const percentage = $(element).find('div[data-field="ChangePer"]').text().trim();
-              const abss = $(element).find('div[data-field="ChangeAbs"]').text().trim();
-              const unit = $(element).find('td.table__td.text-right').text().trim();
-              const date = $(element).find('div[data-field="MidTimestamp"]').text().trim();
+        $('tr.table__tr').each((index, element) => {
+            const name = $(element).find('td.table__td.bold').text().trim();
+            const price = $(element).find('div[data-field="Mid"]').text().trim();
+            const unit = $(element).find('td.table__td.text-right').text().trim();
 
-              if (name !== '') {
-                  data.push({
-                      id: uuidv4(),
-                      name: name,
-                      price: price,
-                      percentage: percentage,
-                      abss: abss,
-                      unit: unit,
-                      date: date
-                  });
-              }
-          });
-      } catch (error) {
-          return { error: `Error: ${error.message}` };
-      }
-      return data;
-  }
+            // Extract currency abbreviation from the unit string
+            let currencyAbbreviation = unit.match(/[A-Z]{3}/g);
+
+            // Check if currency is EURO, replace EUR with EURO
+            if (currencyAbbreviation && currencyAbbreviation.includes('EUR')) {
+                currencyAbbreviation = 'EURO';
+            } else {
+                currencyAbbreviation = '$';
+            }
+
+            if (name !== '') {
+                data.push({
+                    name: name,
+                    price: price,
+                    unit: currencyAbbreviation
+                });
+            }
+        });
+    } catch (error) {
+        return { error: `Error: ${error.message}` };
+    }
+    return data;
+}
+
+
 }
 
 const rs = new RealtimeScraper();
