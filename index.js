@@ -1,7 +1,6 @@
 // Import packages
 const express = require("express");
 const home = require("./routes/home");
-const home = require("./routes/home");
 const admins_Router = require("./routes/admins");
 const blogs_Router = require("./routes/blogs");
 const categories_Router = require("./routes/categories");
@@ -30,13 +29,11 @@ const offer_Router = require("./routes/verified_offers");
 
 const mongoose = require('mongoose');
 const cors = require('cors');
-const res = require("express/lib/response");
 
 const axios = require('axios');
 const cheerio = require('cheerio');
 const { v4: uuidv4 } = require('uuid');
 
-const res = require("express/lib/response");
 
 // Middlewares
 const app = express();
@@ -64,7 +61,6 @@ mongoose.connect('mongodb+srv://moiz36:4RGR6pM_Yh-cx7z@cluster0.ocumynd.mongodb.
 
 
 // Routes
-app.use("/document_inquiry", home);
 app.use("/admins", admins_Router);
 app.use("/blogs", blogs_Router);
 app.use("/categories", categories_Router);
@@ -72,7 +68,7 @@ app.use("/countries", countries_Router);
 app.use("/credit_history", credit_history_Router);
 app.use("/verified_offers", offer_Router);
 app.use("/users", users_Router);
-app.use("/users", document_inquiry_Router);
+app.use("/document_inquiry", document_inquiry_Router);
 app.use("/failed_jobs", failed_job_Router);
 app.use("/inquiries", inquiries_Router);
 app.use("/member_registrtations", member_registrtations_Router);
@@ -108,37 +104,42 @@ class RealtimeScraper {
   }
 
   async scrape() {
-      const data = [];
-      try {
-          const response = await this.session.get('https://markets.businessinsider.com/commodities');
-          const html = response.data;
-          const $ = cheerio.load(html);
+    const data = [];
+    try {
+        const response = await this.session.get('https://markets.businessinsider.com/commodities');
+        const html = response.data;
+        const $ = cheerio.load(html);
 
-          $('tr.table__tr').each((index, element) => {
-              const name = $(element).find('td.table__td.bold').text().trim();
-              const price = $(element).find('div[data-field="Mid"]').text().trim();
-              const percentage = $(element).find('div[data-field="ChangePer"]').text().trim();
-              const abss = $(element).find('div[data-field="ChangeAbs"]').text().trim();
-              const unit = $(element).find('td.table__td.text-right').text().trim();
-              const date = $(element).find('div[data-field="MidTimestamp"]').text().trim();
+        $('tr.table__tr').each((index, element) => {
+            const name = $(element).find('td.table__td.bold').text().trim();
+            const price = $(element).find('div[data-field="Mid"]').text().trim();
+            const unit = $(element).find('td.table__td.text-right').text().trim();
 
-              if (name !== '') {
-                  data.push({
-                      id: uuidv4(),
-                      name: name,
-                      price: price,
-                      percentage: percentage,
-                      abss: abss,
-                      unit: unit,
-                      date: date
-                  });
-              }
-          });
-      } catch (error) {
-          return { error: `Error: ${error.message}` };
-      }
-      return data;
-  }
+            // Extract currency abbreviation from the unit string
+            let currencyAbbreviation = unit.match(/[A-Z]{3}/g);
+
+            // Check if currency is EURO, replace EUR with EURO
+            if (currencyAbbreviation && currencyAbbreviation.includes('EUR')) {
+                currencyAbbreviation = 'EURO';
+            } else {
+                currencyAbbreviation = '$';
+            }
+
+            if (name !== '') {
+                data.push({
+                    name: name,
+                    price: price,
+                    unit: currencyAbbreviation
+                });
+            }
+        });
+    } catch (error) {
+        return { error: `Error: ${error.message}` };
+    }
+    return data;
+}
+
+
 }
 
 const rs = new RealtimeScraper();
