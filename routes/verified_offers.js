@@ -1,9 +1,15 @@
-
 const express = require("express");
 const router = express.Router();
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
     
+const { ObjectId } = mongoose.Types; // Import ObjectId from mongoose.Types
+
+
+// gpt
+const Like = require('../routes/v_offer_like_tbl'); //
+const Comment = require('../routes/verified_offers_comments'); // Import your comment model
+
 
 const verified_offers_Mongoose = new Schema({
     "_id": mongoose.ObjectId,
@@ -77,4 +83,57 @@ router.patch('/:id', async (req, res) => {
 });
 
 
+router.get('/:id/details', async (req, res) => {
+    try {
+        const mainDocId = new mongoose.Types.ObjectId(req.params.id);
+
+        const pipeline = [
+            {
+                $match: { "_id": mainDocId }
+            },
+            {
+                $lookup: {
+                    from: "verified_offers_comments",
+                    localField: "id",
+                    foreignField: "v_offer_id",
+                    as: "comments"
+                }
+            },
+            {
+                $lookup: {
+                    from: "v_offer_like_tbl",
+                    localField: "id",
+                    foreignField: "v_offer_id",
+                    as: "likes"
+                }
+            },
+            {
+                $project: {
+                    "offer_title": 1,
+                    "totalComments": { "$size": "$comments" },
+                    "totalLikes": { "$size": "$likes" }
+                }
+            }
+        ];
+
+        const result = await VerifiedOffer.aggregate(pipeline);
+
+        if (result.length === 0) {
+            return res.status(404).json({ message: 'Main document not found' });
+        }
+
+        res.json(result[0]);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Server Error' });
+    }
+});
+
+
+
 module.exports = router;
+
+
+
+
+
