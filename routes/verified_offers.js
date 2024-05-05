@@ -94,7 +94,7 @@ router.get('/:id/details', async (req, res) => {
             {
                 $lookup: {
                     from: "verified_offers_comments",
-                    localField: "_id",
+                    localField: "id",
                     foreignField: "v_offer_id",
                     as: "comments"
                 }
@@ -102,7 +102,7 @@ router.get('/:id/details', async (req, res) => {
             {
                 $lookup: {
                     from: "v_offer_like_tbl",
-                    localField: "_id",
+                    localField: "id",
                     foreignField: "v_offer_id",
                     as: "likes"
                 }
