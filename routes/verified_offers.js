@@ -38,7 +38,7 @@ router.get('/all_data', async (req, res) => {
             {
                 $lookup: {
                     from: "verified_offers_comments",
-                    localField: "id", // Use "id" field instead of "_id"
+                    localField: "id", 
                     foreignField: "v_offer_id",
                     as: "comments"
                 }
@@ -46,14 +46,14 @@ router.get('/all_data', async (req, res) => {
             {
                 $lookup: {
                     from: "v_offer_like_tbl",
-                    localField: "id", // Use "id" field instead of "_id"
+                    localField: "id", 
                     foreignField: "v_offer_id",
                     as: "likes"
                 }
             },
             {
                 $project: {
-                    "_id": 0, // Exclude _id field
+                    "_id": 0, 
                     "offer_title": 1,
                     "totalComments": { "$size": "$comments" },
                     "totalLikes": { "$size": "$likes" }
@@ -71,7 +71,6 @@ router.get('/all_data', async (req, res) => {
         res.status(500).json({ message: 'Server Error' });
     }
 });
-
 
 // Route to get all offers
 router.get('/', async (req, res) => {
@@ -125,10 +124,6 @@ router.patch('/:id', async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 });
-
-
-
-
 
 // Route to get details of an offer by ID
 router.get('/:id/details', async (req, res) => {
