@@ -55,6 +55,9 @@ router.get('/all_data', async (req, res) => {
                 $project: {
                     "_id": 0, 
                     "offer_title": 1,
+                    "created_at": 1,
+                    "visitors_count": 1,
+                    "offer_type": 1,
                     "totalComments": { "$size": "$comments" },
                     "totalLikes": { "$size": "$likes" }
                 }
