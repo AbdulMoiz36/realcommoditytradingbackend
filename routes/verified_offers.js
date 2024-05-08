@@ -5,9 +5,7 @@ const { Schema } = mongoose;
     
 const { ObjectId } = mongoose.Types; // Import ObjectId from mongoose.Types
 
-// Import models
-const Like = require('../routes/v_offer_like_tbl');
-const Comment = require('../routes/verified_offers_comments');
+
 
 // Define schema for VerifiedOffer
 const verified_offers_Mongoose = new Schema({
