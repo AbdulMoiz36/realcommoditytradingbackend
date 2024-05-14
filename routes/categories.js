@@ -39,7 +39,7 @@ router.get('/id/:id', async (req, res) => {
     try {
         // Find categories where id matches the provided value
         const id = parseInt(req.params.id);
-        const categories = await categoriesModel.find({ id });
+        const categories = await categoriesModel.findOne({ id });
         res.json(categories);
     } catch (error) {
         res.status(500).json({ message: error.message });
