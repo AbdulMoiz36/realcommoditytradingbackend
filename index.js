@@ -25,6 +25,7 @@ const v_offer_like_tbl_Router = require("./routes/v_offer_like_tbl");
 const verified_offers_comments_Router = require("./routes/verified_offers_comments");
 const wallet_Router = require("./routes/wallet");
 const offer_Router = require("./routes/verified_offers");
+// 
 
 
 const mongoose = require('mongoose');
@@ -85,6 +86,7 @@ app.use("/trade_role", trade_role_Router);
 app.use("/v_offer_like_tbl", v_offer_like_tbl_Router);
 app.use("/verified_offers_comments", verified_offers_comments_Router);
 app.use("/wallet", wallet_Router);
+
 
 
 // For Fetching data of top bar

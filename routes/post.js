@@ -59,6 +59,51 @@ const post_Mongoose = new Schema({
 }, { collection: "post" })
  const post_MongooseModel = mongoose.model("post_MongooseModel", post_Mongoose);
 
+ // Route to fetch all data
+router.get('/all_data', async (req, res) => {
+  try {
+      // Define the aggregation pipeline
+      const pipeline = [
+          {
+              $lookup: {
+                  from: "post_comment_n_socials",
+                  localField: "id", 
+                  foreignField: "post_id",
+                  as: "comments"
+              }
+          },
+          {
+              $lookup: {
+                  from: "post_like_tbl",
+                  localField: "id", 
+                  foreignField: "post_id",
+                  as: "likes"
+              }
+          },
+          {
+              $project: {
+                  "_id": 0, 
+                  "post_title": 1,
+                  "created_at": 1,
+                  "post_visitors_count": 1,
+                  "offer_status": 1,
+                  "totalComments": { "$size": "$comments" },
+                  "totalLikes": { "$size": "$likes" }
+              }
+          }
+      ];
+
+      // Execute the aggregation pipeline
+      const result = await post_MongooseModel.aggregate(pipeline);
+
+      // Return the aggregated data
+      res.json(result);
+  } catch (err) {
+      console.error(err);
+      res.status(500).json({ message: 'Server Error' });
+  }
+});
+
 router.get('/', async (req, res) => {
     try {
       // Use Mongoose to find all documents in the "verified_offers" collection

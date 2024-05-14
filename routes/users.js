@@ -184,9 +184,6 @@ router.post('/register', async (req, res) => {
 });
 
 
-  
-  
-
 // Login route
 router.post('/login', async (req, res) => {
     try {
