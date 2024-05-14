@@ -6,7 +6,7 @@ const Schema = mongoose.Schema;
 const categoriesSchema = new Schema({
     "_id": mongoose.ObjectId,
     "id": Number,
-    "parent_id": String,
+    "parent_id": Number,
     "name": String,
     "on_domain": String,
     "created_at": String,
@@ -20,6 +20,16 @@ const categoriesModel = mongoose.model("categoriesModel", categoriesSchema);
 router.get('/', async (req, res) => {
     try {
         const categories = await categoriesModel.find();
+        res.json(categories);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+router.get('/parent/:parent_id', async (req, res) => {
+    try {
+        // Find categories where parent_id matches the provided value
+        const parent_id = parseInt(req.params.parent_id);
+        const categories = await categoriesModel.find({ parent_id });
         res.json(categories);
     } catch (error) {
         res.status(500).json({ message: error.message });
