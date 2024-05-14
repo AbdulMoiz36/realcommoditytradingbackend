@@ -13,7 +13,7 @@ const verified_offers_Mongoose = new Schema({
     "id": Number,
     "offer_title": String,
     "offer_description": String,
-    "subcat_id": Number,
+    "subcat_id": String,
     "offer_type": String,
     "login_session_id": String,
     "visitors_count": String,
@@ -93,6 +93,22 @@ router.get('/:id', async (req, res) => {
         res.json(offer);
     } catch (error) {
         res.status(500).json({ message: error.message });
+    }
+});
+// Route to get data based on subcat_id from URL
+router.get('/subcat/:subcat_id', async (req, res) => {
+    try {
+        const subcat_id = req.params.subcat_id; 
+        const offers = await VerifiedOffer.find({ subcat_id: subcat_id }).exec();
+
+        if (!offers || offers.length === 0) {
+            return res.status(404).json({ message: 'No offers found for the provided subcat_id' });
+        }
+
+        res.json(offers);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Internal Server Error' });
     }
 });
 
