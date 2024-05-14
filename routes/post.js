@@ -104,6 +104,59 @@ router.get('/all_data', async (req, res) => {
   }
 });
 
+// Route to fetch data by ID
+router.get('/all_data/subcat/:id', async (req, res) => {
+  try {
+      const id = parseInt(req.params.id); // Get the ID from the URL parameter
+      
+      // Define the aggregation pipeline to filter data by the provided ID
+      const pipeline = [
+          {
+              $match: {
+                  subcat_id: id // Filter by the provided ID
+              }
+          },
+          {
+            $lookup: {
+                from: "post_comment_n_socials",
+                localField: "id", 
+                foreignField: "post_id",
+                as: "comments"
+            }
+        },
+        {
+            $lookup: {
+                from: "post_like_tbl",
+                localField: "id", 
+                foreignField: "post_id",
+                as: "likes"
+            }
+        },
+        {
+            $project: {
+                "_id": 0, 
+                "post_title": 1,
+                "created_at": 1,
+                "post_visitors_count": 1,
+                "offer_status": 1,
+                "totalComments": { "$size": "$comments" },
+                "totalLikes": { "$size": "$likes" }
+            }
+        }
+      ];
+
+      // Execute the aggregation pipeline
+      const result = await post_MongooseModel.aggregate(pipeline);
+
+      // Send the filtered data as response
+      res.json(result);
+  } catch (error) {
+      // Handle errors
+      console.error(error);
+      res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
 router.get('/', async (req, res) => {
     try {
       // Use Mongoose to find all documents in the "verified_offers" collection
