@@ -51,7 +51,7 @@ router.get('/all_data', async (req, res) => {
             },
             {
                 $project: {
-                    "_id": 0, 
+                    "_id": 1, 
                     "offer_title": 1,
                     "created_at": 1,
                     "visitors_count": 1,
