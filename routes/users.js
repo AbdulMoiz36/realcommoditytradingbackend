@@ -84,6 +84,16 @@ router.get('/', async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 });
+// Routes
+router.get('/id/:id', async (req, res) => {
+  const id = req.params.id;
+    try {
+        const users = await User.findOne({id});
+        res.json(users);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
 
 router.get('/:id', async (req, res) => {
     try {
