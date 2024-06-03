@@ -4,7 +4,6 @@ const router = express.Router();
 const Schema = mongoose.Schema;
 
 const inquiriesSchema = new Schema({
-    "_id": mongoose.ObjectId,
     "id": Number,
     "user_id": String,
     "inquiry_type": String,
