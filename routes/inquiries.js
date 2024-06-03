@@ -39,6 +39,20 @@ router.get('/:id', async (req, res) => {
     }
 });
 
+router.post('/', async (req, res) => {
+    try {
+        const newInquiry = new inquiriesModel({
+            ...req.body,
+            created_at: new Date(),
+            updated_at: new Date(),
+        });
+        const savedInquiry = await newInquiry.save();
+        res.status(201).json(savedInquiry);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
 router.delete('/:id', async (req, res) => {
     try {
         const deletedInquiry = await inquiriesModel.findByIdAndDelete(req.params.id);
