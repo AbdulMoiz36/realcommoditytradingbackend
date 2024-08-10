@@ -6,17 +6,13 @@ const Schema = mongoose.Schema;
 
 const postCommentsNSocialsSchema = new Schema({
     "_id": mongoose.ObjectId,
-    "id": Number,
-    "post_id": Number,
-    "subcat_id": Number,
-    "user_id": Number,
-    "name": String,
-    "email_address": String,
+    "post_id": String,
+    "user_id": String,
+    "user_name": String,
     "comment_text": String,
-    "comment_id": Number,
-    "created_at": String,
-    "updated_at": String,
-    "is_reply": Number,
+    "created_at": { type: String, default: new Date().toISOString() },
+    "updated_at": { type: String, default: new Date().toISOString() },
+    "reply_id": String,
 }, { collection: "post_comments_n_socials" });
 
 const postCommentsNSocialsModel = mongoose.model("postCommentsNSocialsModel", postCommentsNSocialsSchema);
@@ -41,6 +37,17 @@ router.get('/:id', async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 });
+router.get('/post/:id', async (req, res) => {
+    try {
+        const comment = await postCommentsNSocialsModel.find({ post_id: req.params.id });
+        if (!comment) {
+            return res.status(404).json({ message: 'Comments not found' });
+        }
+        res.json(comment);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
 
 router.delete('/:id', async (req, res) => {
     try {
@@ -58,13 +65,39 @@ router.patch('/:id', async (req, res) => {
     try {
         const updatedComment = await postCommentsNSocialsModel.findOneAndUpdate(
             { _id: req.params.id },
-            req.body,
+            { ...req.body, updated_at: new Date().toISOString() },
             { new: true }
         );
         if (!updatedComment) {
             return res.status(404).json({ message: 'Comment not found' });
         }
         res.json(updatedComment);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+router.post('/', async (req, res) => {
+    const { post_id, user_id,user_name, comment_text, reply_id } = req.body;
+    
+    if (!post_id || !user_id || !comment_text) {
+        return res.status(400).json({ message: 'Post ID, User ID, and Comment Text are required' });
+    }
+
+    const newComment = new postCommentsNSocialsModel({
+        _id: new mongoose.Types.ObjectId(),
+        post_id,
+        user_id,
+        user_name,
+        comment_text,
+        created_at: new Date().toString(),
+        updated_at: new Date().toString(),
+        reply_id,
+    });
+
+    try {
+        const savedComment = await newComment.save();
+        res.status(201).json(savedComment);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
