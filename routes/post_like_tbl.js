@@ -6,12 +6,10 @@ const Schema = mongoose.Schema;
 
 const postLikeTblSchema = new Schema({
     "_id": mongoose.ObjectId,
-    "id": Number,
     "user_id": String,
     "post_id": String,
-    "like_status": Number,
-    "created_at": Date,
-    "updated_at": Date,
+    "created_at": { type: String, default: new Date().toISOString() },
+    "updated_at": { type: String, default: new Date().toISOString() },
 }, { collection: "post_like_tbl" });
 
 const postLikeTblModel = mongoose.model("postLikeTblModel", postLikeTblSchema);
@@ -28,6 +26,17 @@ router.get('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
     try {
         const entry = await postLikeTblModel.findOne({ _id: req.params.id });
+        if (!entry) {
+            return res.status(404).json({ message: 'Entry not found' });
+        }
+        res.json(entry);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+router.get('/post/:id', async (req, res) => {
+    try {
+        const entry = await postLikeTblModel.findOne({ post_id: req.params.id });
         if (!entry) {
             return res.status(404).json({ message: 'Entry not found' });
         }
