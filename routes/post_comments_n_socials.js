@@ -37,17 +37,28 @@ router.get('/:id', async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 });
+
 router.get('/post/:id', async (req, res) => {
     try {
-        const comment = await postCommentsNSocialsModel.find({ post_id: req.params.id });
-        if (!comment) {
-            return res.status(404).json({ message: 'Comments not found' });
-        }
-        res.json(comment);
+      const comments = await postCommentsNSocialsModel.find({ post_id: req.params.id });
+  
+      // Separate comments and replies
+      const parentComments = comments.filter(comment => !comment.reply_id);
+      const replies = comments.filter(comment => comment.reply_id);
+  
+      // Associate replies with their parent comments
+      const commentsWithReplies = parentComments.map(comment => {
+        return {
+          ...comment._doc,
+          reply: replies.find(reply => reply.reply_id === comment._id.toString()) || null,
+        };
+      });
+  
+      res.json(commentsWithReplies);
     } catch (error) {
-        res.status(500).json({ message: error.message });
+      res.status(500).json({ message: error.message });
     }
-});
+  });
 
 router.delete('/:id', async (req, res) => {
     try {
