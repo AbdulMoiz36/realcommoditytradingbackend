@@ -12,8 +12,18 @@ const postCommentsNSocialsSchema = new Schema({
     "comment_text": String,
     "created_at": { type: String, default: new Date().toISOString() },
     "updated_at": { type: String, default: new Date().toISOString() },
-    "reply_id": String,
+    "replies": [
+        {
+            "reply_id": mongoose.ObjectId, // unique identifier for the reply
+            "user_id": String,
+            "user_name": String,
+            "comment_text": String,
+            "created_at": { type: String, default: new Date().toISOString() },
+            "updated_at": { type: String, default: new Date().toISOString() }
+        }
+    ]
 }, { collection: "post_comments_n_socials" });
+
 
 const postCommentsNSocialsModel = mongoose.model("postCommentsNSocialsModel", postCommentsNSocialsSchema);
 
@@ -103,7 +113,6 @@ router.post('/', async (req, res) => {
         comment_text,
         created_at: new Date().toString(),
         updated_at: new Date().toString(),
-        reply_id,
     });
 
     try {
@@ -113,5 +122,41 @@ router.post('/', async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 });
+router.post('/:id/reply', async (req, res) => {
+    const { user_id, user_name, comment_text } = req.body;
+    const parentCommentId = req.params.id;
+
+    if (!user_id || !comment_text) {
+        return res.status(400).json({ message: 'User ID and Comment Text are required for a reply' });
+    }
+
+    const newReply = {
+        reply_id: new mongoose.Types.ObjectId(),
+        user_id,
+        user_name,
+        comment_text,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+    };
+
+    try {
+        // Find the parent comment and add the new reply to the replies array
+        const updatedComment = await postCommentsNSocialsModel.findOneAndUpdate(
+            { _id: parentCommentId },
+            { $push: { replies: newReply }, updated_at: new Date().toISOString() },
+            { new: true }
+        );
+
+        if (!updatedComment) {
+            return res.status(404).json({ message: 'Parent comment not found' });
+        }
+
+        res.status(201).json(updatedComment);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+
 
 module.exports = router;
