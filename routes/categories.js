@@ -4,19 +4,27 @@ const router = express.Router();
 const Schema = mongoose.Schema;
 
 const categoriesSchema = new Schema({
-    "_id": mongoose.ObjectId,
-    "id": Number,
-    "parent_id": Number,
-    "name": String,
-    "on_domain": String,
-    "created_at": String,
-    "updated_at": Date,
+    "_id": mongoose.ObjectId,   
+    "name": String,             
+    "on_domain": String,        
+    "created_at": Date,       
+    "updated_at": Date,         
+    "subcategories": [          
+        {
+            "_id": mongoose.ObjectId,
+            "name": String,
+            "on_domain": String,
+            "created_at": String,
+            "updated_at": Date
+        }
+    ]
 }, { 
-    collection: "categories" }
-);
+    collection: "categories" 
+});
+
 
 const categoriesModel = mongoose.model("categoriesModel", categoriesSchema);
-
+// Get all categories
 router.get('/', async (req, res) => {
     try {
         const categories = await categoriesModel.find();
@@ -25,30 +33,11 @@ router.get('/', async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 });
-router.get('/parent/:parent_id', async (req, res) => {
-    try {
-        // Find categories where parent_id matches the provided value
-        const parent_id = parseInt(req.params.parent_id);
-        const categories = await categoriesModel.find({ parent_id });
-        res.json(categories);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-});
-router.get('/id/:id', async (req, res) => {
-    try {
-        // Find categories where id matches the provided value
-        const id = parseInt(req.params.id);
-        const categories = await categoriesModel.findOne({ id });
-        res.json(categories);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-});
 
+// Get a specific category by ID
 router.get('/:id', async (req, res) => {
     try {
-        const category = await categoriesModel.findById(req.params.id);
+        const category = await categoriesModel.findById(req.params.id); // Changed req.params._id to req.params.id
         if (!category) {
             return res.status(404).json({ message: 'Category not found' });
         }
@@ -58,9 +47,33 @@ router.get('/:id', async (req, res) => {
     }
 });
 
+router.get('/subcategories/:id', async (req, res) => {
+    try {
+      const { id } = req.params;
+      // Fetch all categories
+      const categories = await categoriesModel.find().exec();
+      
+      // Search for the subcategory within all categories
+      let foundSubcategory = null;
+      for (const category of categories) {
+        foundSubcategory = category.subcategories.find(sub => sub._id.toString() === id);
+        if (foundSubcategory) break;
+      }
+      
+      if (!foundSubcategory) {
+        return res.status(404).json({ message: 'Subcategory not found' });
+      }
+      
+      res.json(foundSubcategory);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+// Delete a specific category by ID
 router.delete('/:id', async (req, res) => {
     try {
-        const deletedCategory = await categoriesModel.findByIdAndDelete(req.params.id);
+        const deletedCategory = await categoriesModel.findByIdAndDelete(req.params.id); // Changed req.params._id to req.params.id
         if (!deletedCategory) {
             return res.status(404).json({ message: 'Category not found' });
         }
@@ -70,10 +83,11 @@ router.delete('/:id', async (req, res) => {
     }
 });
 
+// Update a specific category by ID
 router.patch('/:id', async (req, res) => {
     try {
         const updatedCategory = await categoriesModel.findByIdAndUpdate(
-            req.params.id,
+            req.params.id, // Changed req.params._id to req.params.id
             req.body,
             { new: true }
         );
