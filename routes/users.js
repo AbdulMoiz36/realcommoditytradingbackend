@@ -8,7 +8,6 @@ const saltRounds = 10;
 
 // Schema definition
 const usersSchema = new mongoose.Schema({
-    id: Number,
     user_type: String,
     name: String,
     email: String,
@@ -60,7 +59,6 @@ usersSchema.methods.generateToken = async function () {
       {
         userId: this._id.toString(),
         email: this.email.toString(),
-        role: this.role.toString(),
       },
       "realcommodity",
       {
@@ -84,16 +82,7 @@ router.get('/', async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 });
-// Routes
-router.get('/id/:id', async (req, res) => {
-  const id = req.params.id;
-    try {
-        const users = await User.findOne({id});
-        res.json(users);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-});
+
 
 router.get('/:id', async (req, res) => {
     try {
@@ -111,7 +100,7 @@ router.get('/:id', async (req, res) => {
 router.post('/', async (req, res) => {
     try {
       // Extract necessary information from the request body
-      const { email, password, first_name, last_name } = req.body;
+      const { email, password, first_name, last_name, user_type } = req.body;
   
       // Validate if required fields are present
       if (!email || !password || !first_name || !last_name) {
@@ -124,6 +113,7 @@ router.post('/', async (req, res) => {
         password,
         first_name,
         last_name,
+        user_type,
         // You can set other fields here if needed
       });
   
@@ -213,6 +203,7 @@ router.post('/login', async (req, res) => {
             msg: "Login successful!",
             token: await userExist.generateToken(),
             userId: userExist._id.toString(),
+            user_type : userExist.user_type.toString(),
           });
         } else {
           res.status(401).json({ msg: "Invalid Email Or Password" });

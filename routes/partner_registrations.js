@@ -1,102 +1,74 @@
 const express = require("express");
 const mongoose = require("mongoose");
+const multer = require("multer");
+const path = require("path");
 
 const router = express.Router();
-const Schema = mongoose.Schema;
 
-const partnerRegistrationsSchema = new Schema({
-    "_id": mongoose.ObjectId,
-    "id": Number,
-    "user_id": Number,
+// Set up storage configuration for multer
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'uploads/'); // Set the destination folder for uploaded files
+    },
+    filename: (req, file, cb) => {
+        cb(null, Date.now() + path.extname(file.originalname)); // Name files with a timestamp
+    }
+});
+
+// Initialize multer with storage configuration
+const upload = multer({
+    storage: storage,
+    limits: { fileSize: 30 * 1024 * 1024 }, // Limit files to 30MB
+    fileFilter: (req, file, cb) => {
+        // Allow only specific file types
+        const fileTypes = /jpeg|jpg|png|pdf/;
+        const extname = fileTypes.test(path.extname(file.originalname).toLowerCase());
+        const mimetype = fileTypes.test(file.mimetype);
+
+        if (mimetype && extname) {
+            return cb(null, true);
+        } else {
+            cb(new Error("Only images (jpeg, jpg, png) and PDFs are allowed!"));
+        }
+    }
+});
+
+const partnerRegistrationsSchema = new mongoose.Schema({
+    "user_id": String,
     "first_name": String,
     "last_name": String,
     "company_name": String,
     "company_website": String,
-    "full_name": String,
-    "company_registration_copy_file": String,
-    "passport_copy_file": String,
-    "telephone": String,
-    "phone_number": String,
+    "company_registration_copy": String, // Updated field
+    "passport_copy": String, // Updated field
+    "mobile_number": String, // Updated field
+    "telephone_number": String, // Updated field
     "country": String,
     "city": String,
-    "whatsapp_id": String,
-    "wechat_id": String,
-    "skype_id": String,
-    "telegram_id": String,
-    "line_id": String,
-    "sns1": String,
-    "sns2": String,
-    "other_id": String,
-    "trade_role_petroleum": String,
-    "trade_role_crud_oil": String,
-    "trade_role_en590": String,
-    "trade_role_lco": String,
-    "trade_role_etc": String,
-    "prod_metal": String,
-    "prod_copper": String,
-    "prod_aluminum": String,
-    "prod_gold": String,
-    "prod_user_rail": String,
-    "prod_etc1": String,
-    "prod_agri_meat": String,
-    "prod_soyabean": String,
-    "prod_sugar": String,
-    "prod_seed_oil": String,
-    "prod_beef": String,
-    "prod_chicken": String,
-    "prod_pork": String,
-    "prod_lamb": String,
-    "prod_etc2": String,
-    "prod_finance": String,
-    "prod_proj_finance": String,
-    "prod_bank_instrument": String,
-    "prod_bit_coin": String,
-    "prod_property_art": String,
-    "prod_etc3": String,
-    "prod_service": String,
-    "prod_escrow_lawyer": String,
-    "prod_inspection": String,
-    "prod_shiping": String,
-    "prod_storage": String,
-    "prod_banking": String,
-    "etc3": String,
-    "prod_other": String,
-    "other_property_art_rare_item": String,
-    "other_others_o": String,
-    "sellers_buyers_financiers": String,
-    "inspection": String,
-    "shipping": String,
-    "upload_news_and_rank": String,
-    "suggested_activities": String,
-    "upload_resume": String,
-    "company_profile": String,
+    "sns1": String, // Dynamic SNS field
+    "sns2": String, // Dynamic SNS field
+    "sns1_id": String, // Dynamic SNS ID field
+    "sns2_id": String, // Dynamic SNS ID field
+    "selected_roles": Object, // Object to store the roles
     "bank_name": String,
     "bank_address": String,
-    "swift_code": String,
-    "account_name": String,
-    "account_number": String,
-    "bank_telephone": String,
+    "swiss_code": String, // Updated field name
+    "bank_account_name": String,
+    "bank_account_number": String,
+    "bank_telephone_number": String, // Updated field name
     "bank_fax_number": String,
-    "bank_office_name": String,
-    "bank_office_email": String,
+    "bank_officer_name": String,
+    "bank_officer_email": String,
     "bank_website": String,
     "correspondent_bank_name": String,
-    "correspondent_swift_code": String,
-    "correspondent_bank_website": String,
-    "is_agree_t_c": String,
-    "petrolieum_other_desc": String,
-    "metal_other_desc": String,
-    "agree_meat_other_desc": String,
-    "finance_other_desc": String,
-    "service_other_desc": String,
-    "other_prod_desc": String,
-    "petrolium_lng_lpg": String,
-    "petrolium_a1_jp54": String,
-    "metal_iron_ore": String,
-    "service_banking": String,
+    "bic_code": String, // Updated field name
+    "other_suggestions": String,
+    "resume": String, // Field for resume file
+    "profile": String, // Field for company profile file
     "created_at": Date,
-    "updated_at": String,
-}, { collection: "partner_registrations" });
+    "updated_at": Date,
+  }, { collection: 'partner_registrations' });
+  
 
 const partnerRegistrationsModel = mongoose.model("partnerRegistrationsModel", partnerRegistrationsSchema);
 
@@ -117,6 +89,49 @@ router.get('/:id', async (req, res) => {
         }
         res.json(entry);
     } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+router.get('users/:id', async (req, res) => {
+    try {
+        const entry = await partnerRegistrationsModel.findOne({ user_id: req.params.id });
+        if (!entry) {
+            return res.status(404).json({ message: 'Entry not found' });
+        }
+        res.json(entry);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+
+router.post('/', upload.fields([
+    { name: 'company_registration_copy', maxCount: 1 },
+    { name: 'passport_copy', maxCount: 1 },
+    { name: 'resume', maxCount: 1 },
+    { name: 'profile', maxCount: 1 }
+]), async (req, res) => {
+    try {
+        console.log('Request Files:', req.files);
+        console.log('Request Body:', req.body);
+
+        const partnerData = {
+            ...req.body,
+            company_registration_copy: req.files['company_registration_copy'] ? req.files['company_registration_copy'][0].filename : null,
+            passport_copy: req.files['passport_copy'] ? req.files['passport_copy'][0].filename : null,
+            resume: req.files['resume'] ? req.files['resume'][0].filename : null,
+            profile: req.files['profile'] ? req.files['profile'][0].filename : null,
+            created_at: new Date(),
+            updated_at: new Date(),
+        };
+
+        console.log('Partner Data:', partnerData);
+
+        const partner = new partnerRegistrationsModel(partnerData);
+        await partner.save();
+        res.status(201).json(partner);
+    } catch (error) {
+        console.error('Error:', error); // Log the error details
         res.status(500).json({ message: error.message });
     }
 });

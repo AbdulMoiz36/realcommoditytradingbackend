@@ -33,7 +33,6 @@ const cors = require('cors');
 
 const axios = require('axios');
 const cheerio = require('cheerio');
-const { v4: uuidv4 } = require('uuid');
 
 
 // Middlewares
